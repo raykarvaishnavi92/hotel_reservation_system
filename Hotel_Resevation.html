@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hotel Reservation System</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #B8976A;
+    --gold-dark: #8A6A3A;
+    --gold-light: #F5ECD8;
+    --teal: #3B7A6A;
+    --teal-light: #E0F0EB;
+    --purple: #6A5A9A;
+    --purple-light: #EEEAF8;
+    --bg: #FAF8F4;
+    --white: #FFFFFF;
+    --text: #2C2A22;
+    --text-muted: #6A6358;
+    --border: #E0D8C8;
+    --danger: #C0392B;
+    --danger-light: #FBEAEA;
+    --success: #27704A;
+    --success-light: #E5F5EC;
+    --warning: #8A6A0A;
+    --warning-light: #FBF4E0;
+  }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ---- NAVBAR ---- */
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 62px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 18px; font-weight: 600; color: var(--gold-dark);
+    letter-spacing: 0.03em;
+  }
+  .brand-icon {
+    width: 34px; height: 34px; background: var(--gold);
+    border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; font-size: 18px;
+  }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-btn {
+    padding: 7px 16px; border-radius: 8px; border: none;
+    background: none; font-size: 14px; color: var(--text-muted);
+    cursor: pointer; transition: background 0.18s, color 0.18s;
+    font-weight: 500;
+  }
+  .nav-btn:hover { background: var(--gold-light); color: var(--gold-dark); }
+  .nav-btn.active { background: var(--gold-light); color: var(--gold-dark); }
+
+  /* ---- HERO ---- */
+  .hero {
+    background: linear-gradient(135deg, #3B2E1A 0%, #5A4020 60%, #7A5830 100%);
+    padding: 3.5rem 2rem 2.5rem;
+    text-align: center;
+    color: #fff;
+  }
+  .hero h1 { font-size: 30px; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .hero p { font-size: 15px; color: #D0C0A0; }
+  .hero-divider { width: 52px; height: 2px; background: var(--gold); margin: 14px auto 0; border-radius: 2px; }
+
+  /* ---- STATS ---- */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-cell {
+    background: var(--white); padding: 18px 20px; text-align: center;
+  }
+  .stat-num { font-size: 26px; font-weight: 600; color: var(--gold-dark); }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; letter-spacing: 0.04em; }
+
+  /* ---- MAIN CONTENT ---- */
+  .main { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .section-title {
+    font-size: 17px; font-weight: 600; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .si-gold { background: var(--gold-light); }
+  .si-teal { background: var(--teal-light); }
+  .si-purple { background: var(--purple-light); }
+
+  /* ---- FORM CARD ---- */
+  .form-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .form-card h3 {
+    font-size: 14px; font-weight: 600; color: var(--text-muted);
+    margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase;
+    font-size: 11px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  input, select {
+    padding: 9px 12px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 14px; color: var(--text);
+    background: var(--bg); transition: border-color 0.18s, box-shadow 0.18s;
+    outline: none;
+  }
+  input:hover, select:hover { border-color: var(--gold); }
+  input:focus, select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(184, 151, 106, 0.15);
+  }
+  .btn {
+    padding: 9px 20px; border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: background 0.18s, transform 0.12s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-gold { background: var(--gold); color: #fff; }
+  .btn-gold:hover { background: var(--gold-dark); }
+  .btn-outline {
+    background: none; border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .btn-outline:hover { background: var(--bg); }
+  .btn-danger { background: var(--danger); color: #fff; font-size: 12px; padding: 6px 12px; }
+  .btn-danger:hover { background: #A52A20; }
+  .form-actions { display: flex; gap: 10px; margin-top: 1rem; }
+
+  /* ---- TABLE ---- */
+  .table-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--bg); }
+  th {
+    padding: 11px 14px; text-align: left; font-size: 11px;
+    font-weight: 600; color: var(--text-muted); letter-spacing: 0.05em;
+    text-transform: uppercase; border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 14px; color: var(--text);
+    border-bottom: 1px solid var(--border); vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background 0.15s; }
+  tbody tr:hover { background: var(--gold-light); }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+  }
+  .badge-avail { background: var(--success-light); color: var(--success); }
+  .badge-occupied { background: var(--danger-light); color: var(--danger); }
+  .badge-maint { background: var(--warning-light); color: var(--warning); }
+  .badge-confirmed { background: var(--success-light); color: var(--success); }
+  .badge-pending { background: var(--warning-light); color: var(--warning); }
+  .badge-cancelled { background: var(--danger-light); color: var(--danger); }
+  .badge-standard { background: var(--teal-light); color: var(--teal); }
+  .badge-deluxe { background: var(--gold-light); color: var(--gold-dark); }
+  .badge-suite { background: var(--purple-light); color: var(--purple); }
+
+  .empty-state {
+    text-align: center; padding: 3rem 1rem;
+    color: var(--text-muted); font-size: 14px;
+  }
+
+  /* ---- SQL SECTION ---- */
+  .sql-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 14px; margin-bottom: 1.5rem; overflow: hidden;
+  }
+  .sql-header {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg);
+  }
+  .sql-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .sql-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  pre {
+    padding: 1.25rem 1.5rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12.5px; line-height: 1.8;
+    color: var(--text); overflow-x: auto;
+    white-space: pre;
+  }
+  .kw { color: #5A4A8A; font-weight: 600; }
+  .tp { color: #2E6A58; }
+  .st { color: #8A6A3A; }
+  .cm { color: #999; font-style: italic; }
+
+  /* ---- DASHBOARD ---- */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px; margin-bottom: 1.5rem;
+  }
+  .dash-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.25rem;
+    transition: border-color 0.2s, transform 0.18s;
+    cursor: default;
+  }
+  .dash-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .dash-card-label { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+  .dash-card-num { font-size: 28px; font-weight: 600; color: var(--gold-dark); }
+  .dash-card-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  .recent-table-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .recent-header {
+    padding: 14px 18px; font-size: 13px; font-weight: 600;
+    color: var(--text); border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  @media (max-width: 600px) {
+    nav { padding: 0 1rem; }
+    .main { padding: 1rem; }
+    .hero { padding: 2rem 1rem 1.5rem; }
+    .hero h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="brand">
+    <div class="brand-icon">🏨</div>
+    Grand Palace Hotel
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="showSection('customers')">Customers</button>
+    <button class="nav-btn" onclick="showSection('rooms')">Rooms</button>
+    <button class="nav-btn" onclick="showSection('bookings')">Bookings</button>
+    <button class="nav-btn" onclick="showSection('sql')">SQL Schema</button>
+    <button class="nav-btn" style="color:#C0392B;" onclick="resetData()">↺ Reset</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Hotel Reservation System</h1>
+  <p>Manage customers, rooms and bookings from one place</p>
+  <div class="hero-divider"></div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-cell"><div class="stat-num" id="stat-customers">0</div><div class="stat-label">Customers</div></div>
+  <div class="stat-cell"><div class="stat-num" id="stat-rooms">0</div><div class="stat-label">Total Rooms</div></div>
+  <div class="stat-cell"><div class="stat-num" id="stat-available">0</div><div class="stat-label">Available Rooms</div></div>
+  <div class="stat-cell"><div class="stat-num" id="stat-bookings">0</div><div class="stat-label">Bookings</div></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div id="sec-dashboard" class="section active">
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="dash-card-label">Total customers</div>
+        <div class="dash-card-num" id="d-customers">0</div>
+        <div class="dash-card-sub">Registered guests</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">Available rooms</div>
+        <div class="dash-card-num" id="d-available">0</div>
+        <div class="dash-card-sub">Ready for booking</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">Active bookings</div>
+        <div class="dash-card-num" id="d-active">0</div>
+        <div class="dash-card-sub">Confirmed reservations</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-label">Total revenue</div>
+        <div class="dash-card-num" id="d-revenue">₹0</div>
+        <div class="dash-card-sub">From confirmed bookings</div>
+      </div>
+    </div>
+    <div class="recent-table-card">
+      <div class="recent-header">Recent bookings</div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Booking ID</th><th>Customer</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody id="dash-bookings-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOMERS -->
+  <div id="sec-customers" class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon si-gold">👤</div>
+        Customer Management
+      </div>
+    </div>
+    <div class="form-card">
+      <h3>Add New Customer</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input id="c-name" type="text" placeholder="e.g. Priya Sharma" />
+        </div>
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input id="c-email" type="email" placeholder="e.g. priya@email.com" />
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input id="c-phone" type="tel" placeholder="e.g. +91 98765 43210" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-gold" onclick="addCustomer()">Add Customer</button>
+        <button class="btn btn-outline" onclick="clearCustomerForm()">Clear</button>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>ID</th><th>Full Name</th><th>Email</th><th>Phone</th><th>Registered</th><th>Action</th></tr></thead>
+          <tbody id="customers-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOMS -->
+  <div id="sec-rooms" class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon si-teal">🛏</div>
+        Room Management
+      </div>
+    </div>
+    <div class="form-card">
+      <h3>Add New Room</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Room Number *</label>
+          <input id="r-num" type="text" placeholder="e.g. 101" />
+        </div>
+        <div class="form-group">
+          <label>Room Type *</label>
+          <select id="r-type">
+            <option value="">Select type</option>
+            <option value="Standard">Standard</option>
+            <option value="Deluxe">Deluxe</option>
+            <option value="Suite">Suite</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price per Night (₹) *</label>
+          <input id="r-price" type="number" placeholder="e.g. 3500" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Max Guests</label>
+          <input id="r-guests" type="number" placeholder="2" min="1" max="10" value="2" />
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="r-status">
+            <option value="Available">Available</option>
+            <option value="Occupied">Occupied</option>
+            <option value="Maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-gold" onclick="addRoom()">Add Room</button>
+        <button class="btn btn-outline" onclick="clearRoomForm()">Clear</button>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>ID</th><th>Room No.</th><th>Type</th><th>Price/Night</th><th>Max Guests</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="rooms-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKINGS -->
+  <div id="sec-bookings" class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon si-purple">📋</div>
+        Booking Management
+      </div>
+    </div>
+    <div class="form-card">
+      <h3>New Reservation</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Customer *</label>
+          <select id="b-customer"><option value="">Select customer</option></select>
+        </div>
+        <div class="form-group">
+          <label>Room *</label>
+          <select id="b-room"><option value="">Select available room</option></select>
+        </div>
+        <div class="form-group">
+          <label>Check-in Date *</label>
+          <input id="b-checkin" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Check-out Date *</label>
+          <input id="b-checkout" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="b-status">
+            <option value="Confirmed">Confirmed</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estimated Amount</label>
+          <input id="b-amount" type="text" placeholder="Auto-calculated" readonly style="background:#f0ece4;" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-gold" onclick="addBooking()">Create Booking</button>
+        <button class="btn btn-outline" onclick="clearBookingForm()">Clear</button>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Booking ID</th><th>Customer</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="bookings-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SQL SCHEMA -->
+  <div id="sec-sql" class="section">
+    <div class="sql-card">
+      <div class="sql-header">
+        <div class="sql-dot" style="background:#B8976A;"></div>
+        <div class="sql-title">customers — create table</div>
+      </div>
+      <pre><span class="cm">-- ================================================</span>
+<span class="cm">-- TABLE: customers</span>
+<span class="cm">-- Stores hotel guest / customer information</span>
+<span class="cm">-- ================================================</span>
+<span class="kw">CREATE TABLE</span> customers (
+    customer_id   <span class="tp">INT</span>           <span class="kw">AUTO_INCREMENT PRIMARY KEY</span>,
+    full_name     <span class="tp">VARCHAR</span>(100)  <span class="kw">NOT NULL</span>,
+    email         <span class="tp">VARCHAR</span>(150)  <span class="kw">UNIQUE NOT NULL</span>,
+    phone         <span class="tp">VARCHAR</span>(20),
+    created_at    <span class="tp">TIMESTAMP</span>    <span class="kw">DEFAULT</span> <span class="kw">CURRENT_TIMESTAMP</span>
+);
+
+<span class="cm">-- Sample inserts</span>
+<span class="kw">INSERT INTO</span> customers (full_name, email, phone) <span class="kw">VALUES</span>
+    (<span class="st">'Priya Sharma'</span>,    <span class="st">'priya@gmail.com'</span>,   <span class="st">'+91 98765 43210'</span>),
+    (<span class="st">'Arjun Mehta'</span>,     <span class="st">'arjun@yahoo.com'</span>,   <span class="st">'+91 87654 32109'</span>),
+    (<span class="st">'Sofia Fernandes'</span>, <span class="st">'sofia@outlook.com'</span>, <span class="st">'+91 76543 21098'</span>);</pre>
+    </div>
+
+    <div class="sql-card">
+      <div class="sql-header">
+        <div class="sql-dot" style="background:#3B7A6A;"></div>
+        <div class="sql-title">rooms — create table</div>
+      </div>
+      <pre><span class="cm">-- ================================================</span>
+<span class="cm">-- TABLE: rooms</span>
+<span class="cm">-- Stores room inventory, type, price and status</span>
+<span class="cm">-- ================================================</span>
+<span class="kw">CREATE TABLE</span> rooms (
+    room_id         <span class="tp">INT</span>             <span class="kw">AUTO_INCREMENT PRIMARY KEY</span>,
+    room_number     <span class="tp">VARCHAR</span>(10)     <span class="kw">UNIQUE NOT NULL</span>,
+    room_type       <span class="tp">ENUM</span>(<span class="st">'Standard'</span>,<span class="st">'Deluxe'</span>,<span class="st">'Suite'</span>) <span class="kw">NOT NULL</span>,
+    price_per_night <span class="tp">DECIMAL</span>(10,2)   <span class="kw">NOT NULL</span>,
+    max_guests      <span class="tp">INT</span>             <span class="kw">DEFAULT</span> 2,
+    status          <span class="tp">ENUM</span>(<span class="st">'Available'</span>,<span class="st">'Occupied'</span>,<span class="st">'Maintenance'</span>)
+                    <span class="kw">DEFAULT</span> <span class="st">'Available'</span>,
+    created_at      <span class="tp">TIMESTAMP</span>       <span class="kw">DEFAULT</span> <span class="kw">CURRENT_TIMESTAMP</span>
+);
+
+<span class="cm">-- Sample inserts</span>
+<span class="kw">INSERT INTO</span> rooms (room_number, room_type, price_per_night, max_guests, status) <span class="kw">VALUES</span>
+    (<span class="st">'101'</span>, <span class="st">'Standard'</span>, 3500.00,  2, <span class="st">'Available'</span>),
+    (<span class="st">'205'</span>, <span class="st">'Deluxe'</span>,   6200.00,  3, <span class="st">'Occupied'</span>),
+    (<span class="st">'301'</span>, <span class="st">'Suite'</span>,    12000.00, 4, <span class="st">'Available'</span>),
+    (<span class="st">'108'</span>, <span class="st">'Standard'</span>, 3500.00,  2, <span class="st">'Maintenance'</span>);</pre>
+    </div>
+
+    <div class="sql-card">
+      <div class="sql-header">
+        <div class="sql-dot" style="background:#6A5A9A;"></div>
+        <div class="sql-title">bookings — create table</div>
+      </div>
+      <pre><span class="cm">-- ================================================</span>
+<span class="cm">-- TABLE: bookings</span>
+<span class="cm">-- Links customers to rooms with dates & status</span>
+<span class="cm">-- ================================================</span>
+<span class="kw">CREATE TABLE</span> bookings (
+    booking_id      <span class="tp">INT</span>             <span class="kw">AUTO_INCREMENT PRIMARY KEY</span>,
+    customer_id     <span class="tp">INT</span>             <span class="kw">NOT NULL</span>,
+    room_id         <span class="tp">INT</span>             <span class="kw">NOT NULL</span>,
+    check_in_date   <span class="tp">DATE</span>            <span class="kw">NOT NULL</span>,
+    check_out_date  <span class="tp">DATE</span>            <span class="kw">NOT NULL</span>,
+    total_amount    <span class="tp">DECIMAL</span>(10,2),
+    status          <span class="tp">ENUM</span>(<span class="st">'Confirmed'</span>,<span class="st">'Pending'</span>,<span class="st">'Cancelled'</span>)
+                    <span class="kw">DEFAULT</span> <span class="st">'Pending'</span>,
+    booked_at       <span class="tp">TIMESTAMP</span>       <span class="kw">DEFAULT</span> <span class="kw">CURRENT_TIMESTAMP</span>,
+
+    <span class="kw">CONSTRAINT</span> fk_customer
+        <span class="kw">FOREIGN KEY</span> (customer_id)
+        <span class="kw">REFERENCES</span> customers(customer_id)
+        <span class="kw">ON DELETE CASCADE</span>,
+
+    <span class="kw">CONSTRAINT</span> fk_room
+        <span class="kw">FOREIGN KEY</span> (room_id)
+        <span class="kw">REFERENCES</span> rooms(room_id)
+        <span class="kw">ON DELETE CASCADE</span>,
+
+    <span class="kw">CONSTRAINT</span> chk_dates
+        <span class="kw">CHECK</span> (check_out_date > check_in_date)
+);
+
+<span class="cm">-- Sample inserts</span>
+<span class="kw">INSERT INTO</span> bookings (customer_id, room_id, check_in_date, check_out_date, total_amount, status) <span class="kw">VALUES</span>
+    (1, 2, <span class="st">'2026-04-20'</span>, <span class="st">'2026-04-23'</span>, 18600.00, <span class="st">'Confirmed'</span>),
+    (3, 3, <span class="st">'2026-04-25'</span>, <span class="st">'2026-04-28'</span>, 36000.00, <span class="st">'Pending'</span>),
+    (2, 1, <span class="st">'2026-04-19'</span>, <span class="st">'2026-04-21'</span>, 7000.00,  <span class="st">'Cancelled'</span>);</pre>
+    </div>
+
+    <div class="sql-card">
+      <div class="sql-header">
+        <div class="sql-dot" style="background:#888;"></div>
+        <div class="sql-title">useful queries</div>
+      </div>
+      <pre><span class="cm">-- All available rooms</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> rooms <span class="kw">WHERE</span> status = <span class="st">'Available'</span>;
+
+<span class="cm">-- All bookings with customer name and room number</span>
+<span class="kw">SELECT</span>
+    b.booking_id,
+    c.full_name   <span class="kw">AS</span> customer,
+    r.room_number,
+    r.room_type,
+    b.check_in_date,
+    b.check_out_date,
+    b.total_amount,
+    b.status
+<span class="kw">FROM</span> bookings b
+<span class="kw">JOIN</span> customers c <span class="kw">ON</span> b.customer_id = c.customer_id
+<span class="kw">JOIN</span> rooms     r <span class="kw">ON</span> b.room_id     = r.room_id
+<span class="kw">ORDER BY</span> b.booked_at <span class="kw">DESC</span>;
+
+<span class="cm">-- Total revenue from confirmed bookings</span>
+<span class="kw">SELECT</span> <span class="tp">SUM</span>(total_amount) <span class="kw">AS</span> total_revenue
+<span class="kw">FROM</span> bookings
+<span class="kw">WHERE</span> status = <span class="st">'Confirmed'</span>;
+
+<span class="cm">-- Count bookings per room type</span>
+<span class="kw">SELECT</span> r.room_type, <span class="tp">COUNT</span>(*) <span class="kw">AS</span> total_bookings
+<span class="kw">FROM</span> bookings b
+<span class="kw">JOIN</span> rooms r <span class="kw">ON</span> b.room_id = r.room_id
+<span class="kw">GROUP BY</span> r.room_type;</pre>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+const DEFAULT_CUSTOMERS = [
+  { id: 101, name: 'Vaishnavi Raykar',     email: 'vaishnavi.raykar@gmail.com',    phone: '+91 98765 43210', date: '2026-04-01' },
+  { id: 102, name: 'Shruti Pagare',        email: 'shruti.pagare@gmail.com',        phone: '+91 87654 32109', date: '2026-04-05' },
+  { id: 103, name: 'Rajnandini Pimparwar', email: 'rajnandini.pimparwar@gmail.com', phone: '+91 76543 21098', date: '2026-04-10' },
+];
+const DEFAULT_ROOMS = [
+  { id: 1,  number: '101', type: 'Standard', price: 3500,  guests: 2, status: 'Available' },
+  { id: 2,  number: '102', type: 'Standard', price: 3500,  guests: 2, status: 'Available' },
+  { id: 3,  number: '103', type: 'Standard', price: 3500,  guests: 2, status: 'Available' },
+  { id: 4,  number: '201', type: 'Deluxe',   price: 6200,  guests: 3, status: 'Available' },
+  { id: 5,  number: '202', type: 'Deluxe',   price: 6200,  guests: 3, status: 'Available' },
+  { id: 6,  number: '203', type: 'Deluxe',   price: 6200,  guests: 3, status: 'Available' },
+  { id: 7,  number: '301', type: 'Suite',    price: 12000, guests: 4, status: 'Available' },
+  { id: 8,  number: '104', type: 'Standard', price: 3500,  guests: 2, status: 'Occupied' },
+  { id: 9,  number: '204', type: 'Deluxe',   price: 6200,  guests: 3, status: 'Occupied' },
+  { id: 10, number: '302', type: 'Suite',    price: 12000, guests: 4, status: 'Occupied' },
+  { id: 11, number: '105', type: 'Standard', price: 3500,  guests: 2, status: 'Maintenance' },
+  { id: 12, number: '205', type: 'Deluxe',   price: 6200,  guests: 3, status: 'Maintenance' },
+  { id: 13, number: '303', type: 'Suite',    price: 12000, guests: 4, status: 'Maintenance' },
+];
+const DEFAULT_BOOKINGS = [
+  { id: 'B001', custId: 101, roomId: 8,  checkIn: '2026-04-20', checkOut: '2026-04-23', amount: 10500, status: 'Confirmed' },
+  { id: 'B002', custId: 103, roomId: 10, checkIn: '2026-04-25', checkOut: '2026-04-28', amount: 36000, status: 'Pending' },
+  { id: 'B003', custId: 102, roomId: 9,  checkIn: '2026-04-19', checkOut: '2026-04-21', amount: 12400, status: 'Cancelled' },
+];
+
+function loadData() {
+  const raw = localStorage.getItem('hotel_data');
+  if (raw) {
+    const saved = JSON.parse(raw);
+    customers   = saved.customers;
+    rooms       = saved.rooms;
+    bookings    = saved.bookings;
+    nextCustId  = saved.nextCustId;
+    nextRoomId  = saved.nextRoomId;
+    nextBookId  = saved.nextBookId;
+  } else {
+    customers  = JSON.parse(JSON.stringify(DEFAULT_CUSTOMERS));
+    rooms      = JSON.parse(JSON.stringify(DEFAULT_ROOMS));
+    bookings   = JSON.parse(JSON.stringify(DEFAULT_BOOKINGS));
+    nextCustId = 104; nextRoomId = 14; nextBookId = 4;
+    saveData();
+  }
+}
+
+function saveData() {
+  localStorage.setItem('hotel_data', JSON.stringify({
+    customers, rooms, bookings, nextCustId, nextRoomId, nextBookId
+  }));
+}
+
+let customers, rooms, bookings, nextCustId, nextRoomId, nextBookId;
+loadData();
+
+function fmt(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,m,dd] = d.split('-');
+  return `${dd}/${m}/${y}`;
+}
+function nights(a,b) {
+  const d = (new Date(b) - new Date(a)) / 86400000;
+  return d > 0 ? d : 0;
+}
+function badgeStatus(s) {
+  const map = {
+    Available:'badge-avail', Occupied:'badge-occupied', Maintenance:'badge-maint',
+    Confirmed:'badge-confirmed', Pending:'badge-pending', Cancelled:'badge-cancelled'
+  };
+  return `<span class="badge ${map[s]||''}">${s}</span>`;
+}
+function badgeType(t) {
+  const map = { Standard:'badge-standard', Deluxe:'badge-deluxe', Suite:'badge-suite' };
+  return `<span class="badge ${map[t]||''}">${t}</span>`;
+}
+
+function updateStats() {
+  const avail = rooms.filter(r=>r.status==='Available').length;
+  const revenue = bookings.filter(b=>b.status==='Confirmed').reduce((s,b)=>s+b.amount,0);
+  document.getElementById('stat-customers').textContent = customers.length;
+  document.getElementById('stat-rooms').textContent = rooms.length;
+  document.getElementById('stat-available').textContent = avail;
+  document.getElementById('stat-bookings').textContent = bookings.length;
+  document.getElementById('d-customers').textContent = customers.length;
+  document.getElementById('d-available').textContent = avail;
+  document.getElementById('d-active').textContent = bookings.filter(b=>b.status==='Confirmed').length;
+  document.getElementById('d-revenue').textContent = fmt(revenue);
+}
+
+function renderCustomers() {
+  const tb = document.getElementById('customers-body');
+  if (!customers.length) { tb.innerHTML = '<tr><td colspan="6"><div class="empty-state">No customers yet. Add one above.</div></td></tr>'; return; }
+  tb.innerHTML = customers.map(c => `
+    <tr>
+      <td><strong>${c.id}</strong></td>
+      <td>${c.name}</td>
+      <td style="color:#5A4A8A">${c.email}</td>
+      <td>${c.phone||'—'}</td>
+      <td>${fmtDate(c.date)}</td>
+      <td><button class="btn btn-danger" onclick="deleteCustomer(${c.id})">Remove</button></td>
+    </tr>`).join('');
+}
+
+function renderRooms() {
+  const tb = document.getElementById('rooms-body');
+  if (!rooms.length) { tb.innerHTML = '<tr><td colspan="7"><div class="empty-state">No rooms yet. Add one above.</div></td></tr>'; return; }
+  tb.innerHTML = rooms.map(r => `
+    <tr>
+      <td><strong>${r.id}</strong></td>
+      <td><strong>${r.number}</strong></td>
+      <td>${badgeType(r.type)}</td>
+      <td>${fmt(r.price)}</td>
+      <td>${r.guests}</td>
+      <td>${badgeStatus(r.status)}</td>
+      <td><button class="btn btn-danger" onclick="deleteRoom(${r.id})">Remove</button></td>
+    </tr>`).join('');
+}
+
+function renderBookings() {
+  const tb = document.getElementById('bookings-body');
+  if (!bookings.length) { tb.innerHTML = '<tr><td colspan="9"><div class="empty-state">No bookings yet. Create one above.</div></td></tr>'; return; }
+  tb.innerHTML = bookings.map(b => {
+    const c = customers.find(x=>x.id===b.custId);
+    const r = rooms.find(x=>x.id===b.roomId);
+    const n = nights(b.checkIn, b.checkOut);
+    return `
+    <tr>
+      <td><strong>${b.id}</strong></td>
+      <td>${c?c.name:'—'}</td>
+      <td>${r?r.number+' ('+r.type+')':'—'}</td>
+      <td>${fmtDate(b.checkIn)}</td>
+      <td>${fmtDate(b.checkOut)}</td>
+      <td>${n} nights</td>
+      <td>${fmt(b.amount)}</td>
+      <td>${badgeStatus(b.status)}</td>
+      <td><button class="btn btn-danger" onclick="deleteBooking('${b.id}')">Remove</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderDashBookings() {
+  const tb = document.getElementById('dash-bookings-body');
+  const recent = [...bookings].reverse().slice(0,5);
+  if (!recent.length) { tb.innerHTML = '<tr><td colspan="7"><div class="empty-state">No bookings yet.</div></td></tr>'; return; }
+  tb.innerHTML = recent.map(b => {
+    const c = customers.find(x=>x.id===b.custId);
+    const r = rooms.find(x=>x.id===b.roomId);
+    return `<tr>
+      <td><strong>${b.id}</strong></td>
+      <td>${c?c.name:'—'}</td>
+      <td>${r?r.number:'—'} (${r?r.type:'—'})</td>
+      <td>${fmtDate(b.checkIn)}</td>
+      <td>${fmtDate(b.checkOut)}</td>
+      <td>${fmt(b.amount)}</td>
+      <td>${badgeStatus(b.status)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function refreshBookingSelects() {
+  const cs = document.getElementById('b-customer');
+  const rs = document.getElementById('b-room');
+  cs.innerHTML = '<option value="">Select customer</option>' +
+    customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  rs.innerHTML = '<option value="">Select available room</option>' +
+    rooms.filter(r=>r.status==='Available').map(r=>`<option value="${r.id}">${r.number} — ${r.type} — ${fmt(r.price)}/night</option>`).join('');
+}
+
+function calcAmount() {
+  const roomId = parseInt(document.getElementById('b-room').value);
+  const ci = document.getElementById('b-checkin').value;
+  const co = document.getElementById('b-checkout').value;
+  const r = rooms.find(x=>x.id===roomId);
+  if (r && ci && co) {
+    const n = nights(ci, co);
+    document.getElementById('b-amount').value = n > 0 ? fmt(r.price * n) : '';
+  } else {
+    document.getElementById('b-amount').value = '';
+  }
+}
+
+document.getElementById('b-room').addEventListener('change', calcAmount);
+document.getElementById('b-checkin').addEventListener('change', calcAmount);
+document.getElementById('b-checkout').addEventListener('change', calcAmount);
+
+function addCustomer() {
+  const name  = document.getElementById('c-name').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const phone = document.getElementById('c-phone').value.trim();
+  if (!name || !email) { alert('Please enter name and email.'); return; }
+  if (customers.find(c=>c.email===email)) { alert('Email already exists.'); return; }
+  customers.push({ id: nextCustId++, name, email, phone, date: new Date().toISOString().split('T')[0] });
+  saveData();
+  clearCustomerForm();
+  renderCustomers(); refreshBookingSelects(); updateStats();
+}
+
+function deleteCustomer(id) {
+  if (!confirm('Remove this customer?')) return;
+  customers = customers.filter(c=>c.id!==id);
+  saveData();
+  renderCustomers(); refreshBookingSelects(); updateStats();
+}
+
+function clearCustomerForm() {
+  ['c-name','c-email','c-phone'].forEach(id=>document.getElementById(id).value='');
+}
+
+function addRoom() {
+  const num    = document.getElementById('r-num').value.trim();
+  const type   = document.getElementById('r-type').value;
+  const price  = parseFloat(document.getElementById('r-price').value);
+  const guests = parseInt(document.getElementById('r-guests').value) || 2;
+  const status = document.getElementById('r-status').value;
+  if (!num || !type || !price) { alert('Please fill room number, type and price.'); return; }
+  if (rooms.find(r=>r.number===num)) { alert('Room number already exists.'); return; }
+  rooms.push({ id: nextRoomId++, number: num, type, price, guests, status });
+  saveData();
+  clearRoomForm();
+  renderRooms(); refreshBookingSelects(); updateStats();
+}
+
+function deleteRoom(id) {
+  if (!confirm('Remove this room?')) return;
+  rooms = rooms.filter(r=>r.id!==id);
+  saveData();
+  renderRooms(); refreshBookingSelects(); updateStats();
+}
+
+function clearRoomForm() {
+  ['r-num','r-price'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('r-type').value='';
+  document.getElementById('r-guests').value='2';
+  document.getElementById('r-status').value='Available';
+}
+
+function addBooking() {
+  const custId   = parseInt(document.getElementById('b-customer').value);
+  const roomId   = parseInt(document.getElementById('b-room').value);
+  const checkIn  = document.getElementById('b-checkin').value;
+  const checkOut = document.getElementById('b-checkout').value;
+  const status   = document.getElementById('b-status').value;
+  if (!custId || !roomId || !checkIn || !checkOut) { alert('Please fill all required fields.'); return; }
+  if (checkOut <= checkIn) { alert('Check-out must be after check-in.'); return; }
+  const r = rooms.find(x=>x.id===roomId);
+  const n = nights(checkIn, checkOut);
+  const amount = r ? r.price * n : 0;
+  const id = 'B' + String(nextBookId++).padStart(3,'0');
+  bookings.push({ id, custId, roomId, checkIn, checkOut, amount, status });
+  if (status === 'Confirmed') {
+    const room = rooms.find(x=>x.id===roomId);
+    if (room) room.status = 'Occupied';
+  }
+  saveData();
+  clearBookingForm();
+  renderBookings(); renderDashBookings(); renderRooms(); refreshBookingSelects(); updateStats();
+}
+
+function deleteBooking(id) {
+  if (!confirm('Remove this booking?')) return;
+  bookings = bookings.filter(b=>b.id!==id);
+  saveData();
+  renderBookings(); renderDashBookings(); updateStats();
+}
+
+function clearBookingForm() {
+  document.getElementById('b-customer').value='';
+  document.getElementById('b-room').value='';
+  document.getElementById('b-checkin').value='';
+  document.getElementById('b-checkout').value='';
+  document.getElementById('b-amount').value='';
+  document.getElementById('b-status').value='Confirmed';
+}
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function resetData() {
+  if (!confirm('सगळा data reset करायचा आहे का? (Default 3 customers, 13 rooms परत येतील)')) return;
+  localStorage.removeItem('hotel_data');
+  loadData();
+  renderCustomers(); renderRooms(); renderBookings(); renderDashBookings();
+  refreshBookingSelects(); updateStats();
+}
+
+renderCustomers(); renderRooms(); renderBookings(); renderDashBookings();
+refreshBookingSelects(); updateStats();
+</script>
+</body>
+</html>
